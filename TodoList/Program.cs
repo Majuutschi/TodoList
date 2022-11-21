@@ -171,6 +171,22 @@ void AddNewTask()
     MainMenu();
 }
 
+// Update Task
+void UpdateTask()
+{
+    SortByDate();
+    Console.WriteLine("Enter the Title of the Task you want to Update:");
+    string updateTitle = Console.ReadLine();
+
+    List<Task> searchedTask = tasks.OrderBy(task => task.TaskTitle).ToList();
+    //foreach (Task task in searchedTask)
+    //{
+
+    //}
+
+}
+
+
 // Show Task List Options
 void TaskList()
 {
@@ -213,7 +229,7 @@ void EditMenu()
         switch (editOption)
         {
             case 1:
-                Console.WriteLine("Update Task");
+                UpdateTask();
                 break;
 
             case 2:
