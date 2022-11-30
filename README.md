@@ -1,3 +1,3 @@
 # TodoList
 
-## Console app Todo List
+Console app Todo List
