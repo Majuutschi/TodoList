@@ -98,7 +98,7 @@ void ShowTaskListMenu()
 }
 
 // Sort List By Date
-void SortByDate()
+void ListByDate()
 {
     Console.WriteLine("Task".PadRight(15) + "Due Date".PadRight(15) + "Done".PadRight(15) + "Project".PadRight(15));
     Console.WriteLine("----".PadRight(15) + "--------".PadRight(15) + "----".PadRight(15) + "-------".PadRight(15));
@@ -116,6 +116,10 @@ void SortByDate()
             Console.WriteLine(task.TaskTitle.PadRight(15) + task.TaskDueDate.PadRight(15) + "No".PadRight(15) + task.TaskProject.PadRight(15));
         }
     }
+}
+void SortByDate()
+{
+    ListByDate();
 
     MainMenu();
 }
@@ -174,16 +178,100 @@ void AddNewTask()
 // Update Task
 void UpdateTask()
 {
-    SortByDate();
+    ListByDate();
     Console.WriteLine("Enter the Title of the Task you want to Update:");
     string updateTitle = Console.ReadLine();
 
     List<Task> searchedTask = tasks.OrderBy(task => task.TaskTitle).ToList();
-    //foreach (Task task in searchedTask)
-    //{
+    foreach (Task task in searchedTask)
+    {
+        if (task.TaskTitle == updateTitle)
+        {
+            Console.WriteLine("--------------------------------------------------");
+            Console.WriteLine(task.TaskTitle.PadRight(15) + task.TaskDueDate.PadRight(15) + "No".PadRight(15) + task.TaskProject.PadRight(15));
+            Console.WriteLine("--------------------------------------------------");
+            Console.WriteLine("Enter new title to the Task");
+            string newTitle = Console.ReadLine();
 
-    //}
+            task.TaskTitle = newTitle;
+            Console.WriteLine("--------------------------------------------------");
+            Console.WriteLine(task.TaskTitle.PadRight(15) + task.TaskDueDate.PadRight(15) + "No".PadRight(15) + task.TaskProject.PadRight(15));
+            Console.WriteLine("--------------------------------------------------");
 
+            EditMenu();
+
+        }
+    }
+}
+
+// Mark Task As Done
+void MarkAsDone()
+{
+    ListByDate();
+    Console.WriteLine("Enter the Title of the Task you want to Mark As Done:");
+    string titleDone = Console.ReadLine();
+
+    List<Task> searchedTask = tasks.OrderBy(task => task.TaskTitle).ToList();
+    foreach (Task task in searchedTask)
+    {
+        if (task.TaskTitle == titleDone)
+        {
+            Console.WriteLine("--------------------------------------------------");
+            Console.WriteLine(task.TaskTitle.PadRight(15) + task.TaskDueDate.PadRight(15) + "No".PadRight(15) + task.TaskProject.PadRight(15));
+            Console.WriteLine("--------------------------------------------------");
+            Console.WriteLine("Mark as Done? y/n");
+            string done = Console.ReadLine();
+
+            if (done == "y")
+            {
+                task.TaskStatus = true;
+                Console.WriteLine("--------------------------------------------------");
+                Console.WriteLine(task.TaskTitle.PadRight(15) + task.TaskDueDate.PadRight(15) + "Yes".PadRight(15) + task.TaskProject.PadRight(15));
+                Console.WriteLine("--------------------------------------------------");
+
+                EditMenu();
+            }
+            else
+            {
+                EditMenu();
+            }
+        }
+    }
+}
+
+// Remove Task
+void RemoveTask()
+{
+    ListByDate();
+    Console.WriteLine("Enter the Title of the Task you want to Delete:");
+    string removeTitle = Console.ReadLine();
+
+    List<Task> searchedTask = tasks.OrderBy(task => task.TaskTitle).ToList();
+    foreach (Task task in searchedTask)
+    {
+        if (task.TaskTitle == removeTitle)
+        {
+            Console.WriteLine("--------------------------------------------------");
+            Console.WriteLine(task.TaskTitle.PadRight(15) + task.TaskDueDate.PadRight(15) + "No".PadRight(15) + task.TaskProject.PadRight(15));
+            Console.WriteLine("--------------------------------------------------");
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine("Remove Task? y/n");
+            string remove = Console.ReadLine();
+            Console.ResetColor();
+
+            if (remove == "y")
+            {
+                tasks.Remove(task);
+                ListByDate();
+
+                EditMenu();
+            }
+            else
+            {
+                EditMenu();
+            }
+        }
+    }
 }
 
 
@@ -233,11 +321,11 @@ void EditMenu()
                 break;
 
             case 2:
-                Console.WriteLine("Mark Task as Done");
+                MarkAsDone();
                 break;
 
             case 3:
-                Console.WriteLine("Remove Task");
+                RemoveTask();
                 break;
 
             case 4:
