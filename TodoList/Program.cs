@@ -1,6 +1,8 @@
 ﻿
 using System.Text.RegularExpressions;
+using TodoList;
 
+TodoDbContext Context = new TodoDbContext();
 
 int option = 0;
 bool showMenuAgain = true;
@@ -10,8 +12,9 @@ int listOption = 0;
 bool showListMenuAgain = true;
 
 
-
+Task Task1 = new Task();
 List<Task> tasks = new List<Task>();
+
 
 // Main Menu
 void ShowMainMenu()
@@ -170,7 +173,16 @@ void AddNewTask()
     Console.WriteLine("Enter Task Project Name:");
     string taskProject = Console.ReadLine();
 
+    //Add to List
     tasks.Add(new Task(taskTitle, taskDueDate, taskStatus, taskProject));
+
+    // Save to Database
+    Task1.TaskTitle = taskTitle;
+    Task1.TaskDueDate = taskDueDate;
+    Task1.TaskStatus = taskStatus;
+    Task1.TaskProject = taskProject;
+    Context.Tasks.Add(Task1);
+    Context.SaveChanges();
 
     MainMenu();
 }
@@ -389,6 +401,10 @@ MainMenu();
 
 class Task
 {
+    public Task()
+    {
+    }
+
     public Task(string taskTitle, string taskDueDate, bool taskStatus, string taskProject)
     {
         TaskTitle = taskTitle;
@@ -396,7 +412,7 @@ class Task
         TaskStatus = taskStatus;
         TaskProject = taskProject;
     }
-
+    public int Id { get; set; }
     public string TaskTitle { get; set; }
     public string TaskDueDate { get; set; }
     public bool TaskStatus { get; set; }
