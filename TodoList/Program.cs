@@ -1,5 +1,6 @@
 ﻿
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using TodoList;
 
 TodoDbContext Context = new TodoDbContext();
@@ -15,10 +16,22 @@ bool showListMenuAgain = true;
 List<Task> Tasks = Context.Tasks.ToList();
 
 
+// Some Todos to the list
+Task t1 = new Task("Make lunch", "12/10/2022", Convert.ToDateTime("12/10/2022"), false, "Kitchen");
+Context.Tasks.Add(t1);
+Task t2 = new Task("Laundry", "12/09/2022", Convert.ToDateTime("12/09/2022"), true, "Laundry");
+Context.Tasks.Add(t2);
+Task t3 = new Task("Read book", "12/26/2022", Convert.ToDateTime("12/26/2022"), false, "Wellbeing");
+Context.Tasks.Add(t3);
+Context.SaveChanges();
+
+
 // Main Menu
 void ShowMainMenu()
 {
-    Console.WriteLine("Welcome to ToDoLy");
+    Console.WriteLine();
+
+    Console.WriteLine("Welcome to ToDoList");
     Console.WriteLine($"You have {Context.Tasks.Count()} tasks todo and {Context.Tasks.Where(x => x.TaskStatus == true).Count()} tasks are done!");
 
     Console.WriteLine("Pick an option:");
@@ -49,6 +62,8 @@ void ShowMainMenu()
 // Edit Task Menu
 void EditTaskMenu()
 {
+    Console.WriteLine();
+
     Console.WriteLine("Edit Task (update, mark as done, remove)");
     Console.WriteLine("Pick an option:");
     Console.Write("(");
@@ -78,6 +93,8 @@ void EditTaskMenu()
 // Task List
 void ShowTaskListMenu()
 {
+    Console.WriteLine();
+
     Console.WriteLine("Show Task List");
     Console.WriteLine("Pick an option:");
     Console.Write("(");
@@ -104,8 +121,6 @@ void ListByDate()
 {
     Console.WriteLine("Task".PadRight(15) + "Due Date".PadRight(15) + "Done".PadRight(15) + "Project".PadRight(15));
     Console.WriteLine("----".PadRight(15) + "--------".PadRight(15) + "----".PadRight(15) + "-------".PadRight(15));
-
-    //List<Task> sortedByDate = Tasks.OrderBy(task => Convert.ToDateTime(task.TaskDueDate)).ToList();
     
     List<Task> sortedByDate = Context.Tasks.OrderBy(task => task.TaskDateTime).ToList();
 
@@ -210,8 +225,11 @@ void UpdateTask()
             Console.WriteLine("--------------------------------------------------");
             Console.WriteLine(task.TaskTitle.PadRight(15) + task.TaskDueDate.PadRight(15) + "No".PadRight(15) + task.TaskProject.PadRight(15));
             Console.WriteLine("--------------------------------------------------");
+            Console.ForegroundColor = ConsoleColor.Magenta;
             Console.WriteLine("Enter new title to the Task");
             string newTitle = Console.ReadLine();
+            Console.ResetColor();
+            Console.WriteLine();
 
             task.TaskTitle = newTitle;
             Context.Tasks.Update(task);
@@ -220,9 +238,7 @@ void UpdateTask()
             Console.WriteLine(task.TaskTitle.PadRight(15) + task.TaskDueDate.PadRight(15) + "No".PadRight(15) + task.TaskProject.PadRight(15));
             Console.WriteLine("--------------------------------------------------");
 
-            Console.WriteLine();
             EditMenu();
-
         }
     }
 }
@@ -239,27 +255,30 @@ void MarkAsDone()
     {
         if (task.TaskTitle == titleDone)
         {
+            Console.WriteLine();
             Console.WriteLine("--------------------------------------------------");
             Console.WriteLine(task.TaskTitle.PadRight(15) + task.TaskDueDate.PadRight(15) + "No".PadRight(15) + task.TaskProject.PadRight(15));
             Console.WriteLine("--------------------------------------------------");
+            Console.ForegroundColor = ConsoleColor.DarkYellow;
             Console.WriteLine("Mark as Done? y/n");
             string done = Console.ReadLine();
+            Console.ResetColor();
 
             if (done == "y")
             {   
                 task.TaskStatus = true;
                 Context.Tasks.Update(task);
                 Context.SaveChanges();
+
+                Console.WriteLine();
                 Console.WriteLine("--------------------------------------------------");
                 Console.WriteLine(task.TaskTitle.PadRight(15) + task.TaskDueDate.PadRight(15) + "Yes".PadRight(15) + task.TaskProject.PadRight(15));
                 Console.WriteLine("--------------------------------------------------");
 
-                Console.WriteLine();
                 EditMenu();
             }
             else
             {
-                Console.WriteLine();
                 EditMenu();
             }
         }
