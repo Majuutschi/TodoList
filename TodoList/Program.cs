@@ -12,15 +12,14 @@ int listOption = 0;
 bool showListMenuAgain = true;
 
 
-Task Task1 = new Task();
-List<Task> tasks = new List<Task>();
+List<Task> Tasks = Context.Tasks.ToList();
 
 
 // Main Menu
 void ShowMainMenu()
 {
     Console.WriteLine("Welcome to ToDoLy");
-    Console.WriteLine("You have X tasks todo and Y tasks are done!");
+    Console.WriteLine($"You have {Context.Tasks.Count()} tasks todo and {Context.Tasks.Where(x => x.TaskStatus == true).Count()} tasks are done!");
 
     Console.WriteLine("Pick an option:");
     Console.Write("(");
@@ -106,7 +105,9 @@ void ListByDate()
     Console.WriteLine("Task".PadRight(15) + "Due Date".PadRight(15) + "Done".PadRight(15) + "Project".PadRight(15));
     Console.WriteLine("----".PadRight(15) + "--------".PadRight(15) + "----".PadRight(15) + "-------".PadRight(15));
 
-    List<Task> sortedByDate = tasks.OrderBy(task => Convert.ToDateTime(task.TaskDueDate)).ToList();
+    //List<Task> sortedByDate = Tasks.OrderBy(task => Convert.ToDateTime(task.TaskDueDate)).ToList();
+    
+    List<Task> sortedByDate = Context.Tasks.OrderBy(task => task.TaskDateTime).ToList();
 
     foreach (Task task in sortedByDate)
     {
@@ -119,7 +120,10 @@ void ListByDate()
             Console.WriteLine(task.TaskTitle.PadRight(15) + task.TaskDueDate.PadRight(15) + "No".PadRight(15) + task.TaskProject.PadRight(15));
         }
     }
+
+    Console.WriteLine();
 }
+
 void SortByDate()
 {
     ListByDate();
@@ -133,7 +137,7 @@ void SortByProject()
     Console.WriteLine("Task".PadRight(15) + "Due Date".PadRight(15) + "Done".PadRight(15) + "Project".PadRight(15));
     Console.WriteLine("----".PadRight(15) + "--------".PadRight(15) + "----".PadRight(15) + "-------".PadRight(15));
 
-    List<Task> sortedByProject = tasks.OrderBy(task => task.TaskProject).ToList();
+    List<Task> sortedByProject = Context.Tasks.OrderBy(task => task.TaskProject).ToList();
 
     foreach (Task task in sortedByProject)
     {
@@ -153,6 +157,8 @@ void SortByProject()
 //Add New Task
 void AddNewTask()
 {
+    Task Task1 = new Task();
+
     Console.WriteLine("Add New Task");
     Console.WriteLine("Enter a Task:");
     string taskTitle = Console.ReadLine();
@@ -173,17 +179,19 @@ void AddNewTask()
     Console.WriteLine("Enter Task Project Name:");
     string taskProject = Console.ReadLine();
 
-    //Add to List
-    tasks.Add(new Task(taskTitle, taskDueDate, taskStatus, taskProject));
 
     // Save to Database
     Task1.TaskTitle = taskTitle;
     Task1.TaskDueDate = taskDueDate;
+    Task1.TaskDateTime = Convert.ToDateTime(taskDueDate);
     Task1.TaskStatus = taskStatus;
     Task1.TaskProject = taskProject;
     Context.Tasks.Add(Task1);
     Context.SaveChanges();
 
+    Console.ForegroundColor = ConsoleColor.Green;
+    Console.WriteLine($"{Task1.TaskTitle} was successfully added to the ToDo List!");
+    Console.ResetColor();
     MainMenu();
 }
 
@@ -194,7 +202,7 @@ void UpdateTask()
     Console.WriteLine("Enter the Title of the Task you want to Update:");
     string updateTitle = Console.ReadLine();
 
-    List<Task> searchedTask = tasks.OrderBy(task => task.TaskTitle).ToList();
+    List<Task> searchedTask = Context.Tasks.OrderBy(task => task.TaskTitle).ToList();
     foreach (Task task in searchedTask)
     {
         if (task.TaskTitle == updateTitle)
@@ -206,10 +214,13 @@ void UpdateTask()
             string newTitle = Console.ReadLine();
 
             task.TaskTitle = newTitle;
+            Context.Tasks.Update(task);
+            Context.SaveChanges();
             Console.WriteLine("--------------------------------------------------");
             Console.WriteLine(task.TaskTitle.PadRight(15) + task.TaskDueDate.PadRight(15) + "No".PadRight(15) + task.TaskProject.PadRight(15));
             Console.WriteLine("--------------------------------------------------");
 
+            Console.WriteLine();
             EditMenu();
 
         }
@@ -223,7 +234,7 @@ void MarkAsDone()
     Console.WriteLine("Enter the Title of the Task you want to Mark As Done:");
     string titleDone = Console.ReadLine();
 
-    List<Task> searchedTask = tasks.OrderBy(task => task.TaskTitle).ToList();
+    List<Task> searchedTask = Context.Tasks.OrderBy(task => task.TaskTitle).ToList();
     foreach (Task task in searchedTask)
     {
         if (task.TaskTitle == titleDone)
@@ -235,16 +246,20 @@ void MarkAsDone()
             string done = Console.ReadLine();
 
             if (done == "y")
-            {
+            {   
                 task.TaskStatus = true;
+                Context.Tasks.Update(task);
+                Context.SaveChanges();
                 Console.WriteLine("--------------------------------------------------");
                 Console.WriteLine(task.TaskTitle.PadRight(15) + task.TaskDueDate.PadRight(15) + "Yes".PadRight(15) + task.TaskProject.PadRight(15));
                 Console.WriteLine("--------------------------------------------------");
 
+                Console.WriteLine();
                 EditMenu();
             }
             else
             {
+                Console.WriteLine();
                 EditMenu();
             }
         }
@@ -258,7 +273,7 @@ void RemoveTask()
     Console.WriteLine("Enter the Title of the Task you want to Delete:");
     string removeTitle = Console.ReadLine();
 
-    List<Task> searchedTask = tasks.OrderBy(task => task.TaskTitle).ToList();
+    List<Task> searchedTask = Context.Tasks.OrderBy(task => task.TaskTitle).ToList();
     foreach (Task task in searchedTask)
     {
         if (task.TaskTitle == removeTitle)
@@ -273,7 +288,8 @@ void RemoveTask()
 
             if (remove == "y")
             {
-                tasks.Remove(task);
+                Context.Tasks.Remove(task);
+                Context.SaveChanges();
                 ListByDate();
 
                 EditMenu();
@@ -322,6 +338,7 @@ void TaskList()
 // Edit Tasks Options
 void EditMenu()
 {
+    Console.WriteLine();
     EditTaskMenu();
 
     while (showEditMenuAgain)
@@ -357,9 +374,10 @@ void EditMenu()
 // Main Menu Options
 void MainMenu()
 {
+    Console.WriteLine();
     ShowMainMenu();
 
-    while(showMenuAgain)
+    while (showMenuAgain)
     {
         switch (option)
         {
@@ -405,16 +423,18 @@ class Task
     {
     }
 
-    public Task(string taskTitle, string taskDueDate, bool taskStatus, string taskProject)
+    public Task(string taskTitle, string taskDueDate, DateTime taskDateTime, bool taskStatus, string taskProject)
     {
         TaskTitle = taskTitle;
         TaskDueDate = taskDueDate;
+        TaskDateTime = taskDateTime;
         TaskStatus = taskStatus;
         TaskProject = taskProject;
     }
     public int Id { get; set; }
     public string TaskTitle { get; set; }
     public string TaskDueDate { get; set; }
+    public DateTime TaskDateTime { get; set; }
     public bool TaskStatus { get; set; }
     public string TaskProject { get; set; }
 }
